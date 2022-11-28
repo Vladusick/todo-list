@@ -1,5 +1,6 @@
 // Глобальные переменые
 const todoList = document.getElementById('todo-list');
+const userSelect = document.getElementById('user-todo');
 let todos = [];
 let users = [];
 
@@ -34,6 +35,15 @@ function printTodo({id, userId, title, completed}) {
     todoList.prepend(li);
 }
 
+// Функция создания пользователей
+function createUserOption(user) {
+const option = document.createElement('option');
+option.value = user.id;
+option.innerText = user.name;
+
+userSelect.append(option);
+}
+
 // Event logic (Функция получение данных и записи)
 function initApp() {
     Promise.all([getAllTodos(), getAllUsers()]).then(values => {
@@ -41,6 +51,7 @@ function initApp() {
 
         // Отправка в разметку
         todos.forEach((todo) => printTodo(todo));
+        users.forEach((user) => createUserOption(user));
     })
 }
 
