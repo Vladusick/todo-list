@@ -1,12 +1,14 @@
 // Глобальные переменые
 const todoList = document.getElementById('todo-list');
 const userSelect = document.getElementById('user-todo');
+const form = document.querySelector('form');
 let todos = [];
 let users = [];
 
-// Attach Events
-// Повесил событиt срабатывания скрипта после загрузки страницы
+// Attach Events (Привязка событий)
+// Повесил событие срабатывания скрипта после загрузки страницы
 document.addEventListener('DOMContentLoaded', initApp);
+form.addEventListener('submit', handleSubmit);
 
 // Basic logic
 //Функция получения имени по идентификатору
@@ -16,7 +18,7 @@ function getUserName(userId) {
 }
 
 // Функция отрисовки списка задач
-function printTodo({id, userId, title, completed}) {
+function printTodo({ id, userId, title, completed }) {
     const li = document.createElement('li');
     li.className = 'todo-item';
     li.dataset.id = id;
@@ -37,11 +39,11 @@ function printTodo({id, userId, title, completed}) {
 
 // Функция создания пользователей
 function createUserOption(user) {
-const option = document.createElement('option');
-option.value = user.id;
-option.innerText = user.name;
+    const option = document.createElement('option');
+    option.value = user.id;
+    option.innerText = user.name;
 
-userSelect.append(option);
+    userSelect.append(option);
 }
 
 // Event logic (Функция получение данных и записи)
@@ -53,6 +55,16 @@ function initApp() {
         todos.forEach((todo) => printTodo(todo));
         users.forEach((user) => createUserOption(user));
     })
+}
+
+function handleSubmit(event) {
+    event.preventDefault();
+
+    createTodo({
+        userId : Number (form.user.value),
+        title: form.todo.value,
+        completed: false,
+    });
 }
 
 // Async logic
@@ -70,4 +82,18 @@ async function getAllUsers() {
     const data = await responce.json();
 
     return data;
+}
+
+// Функция создания новой задачи
+async function createTodo(todo) {
+    const responce = await fetch('https://jsonplaceholder.typicode.com/todos', {
+        method: 'POST',
+        body: JSON.stringify(todo),
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    const newTodo = await responce.json();
+    printTodo(newTodo);
 }
