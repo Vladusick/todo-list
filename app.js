@@ -27,6 +27,7 @@ function printTodo({ id, userId, title, completed }) {
     const status = document.createElement('input');
     status.type = 'checkbox';
     status.checked = completed;
+    status.addEventListener('change', handleTodoChange);
 
     const close = document.createElement('span');
     close.innerHTML = '&times;';
@@ -61,11 +62,19 @@ function handleSubmit(event) {
     event.preventDefault();
 
     createTodo({
-        userId : Number (form.user.value),
+        userId: Number(form.user.value),
         title: form.todo.value,
         completed: false,
     });
 }
+
+function handleTodoChange() {
+    const todoId = this.parentElement.dataset.id;
+    const completed = this.checked;
+
+    toggleTodoComplete(todoId, completed);
+}
+
 
 // Async logic
 // Получение всех задач
@@ -96,4 +105,23 @@ async function createTodo(todo) {
 
     const newTodo = await responce.json();
     printTodo(newTodo);
+}
+
+// Функция изменения чекбокса
+async function toggleTodoComplete(todoId, completed) {
+    const responce = await fetch(`https://jsonplaceholder.typicode.com/todos/${todoId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ completed: completed }),
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    // Проверка изменения статуса
+    const data = await responce.json();
+    console.log(data);
+
+    if (!responce.ok) {
+        // error
+    }
 }
