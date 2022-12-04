@@ -32,6 +32,7 @@ function printTodo({ id, userId, title, completed }) {
     const close = document.createElement('span');
     close.innerHTML = '&times;';
     close.className = 'close';
+    close.addEventListener('click', handleClose);
 
     li.prepend(status);
     li.append(close);
@@ -45,6 +46,16 @@ function createUserOption(user) {
     option.innerText = user.name;
 
     userSelect.append(option);
+}
+
+function removeTodo(todoId) {
+    todos = todos.filter(todo => todo.id !== todoId);
+
+    const todo = todoList.querySelector(`[data-id="${todoId}"]`);
+    todo.querySelector('input').removeEventListener('change', handleTodoChange);
+    todo.querySelector('.close').removeEventListener('click', handleClose);
+
+    todo.remove();
 }
 
 // Event logic (Функция получение данных и записи)
@@ -75,6 +86,10 @@ function handleTodoChange() {
     toggleTodoComplete(todoId, completed);
 }
 
+function handleClose() {
+    const todoId = this.parentElement.dataset.id;
+    deleteTodo(todoId);
+}
 
 // Async logic
 // Получение всех задач
@@ -123,5 +138,19 @@ async function toggleTodoComplete(todoId, completed) {
 
     if (!responce.ok) {
         // error
+    }
+}
+
+async function deleteTodo(todoId) {
+    const responce = await fetch(`https://jsonplaceholder.typicode.com/todos/${todoId}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+
+    // Если ответ с сервера пришел корректный, то удаляем из фронта 
+    if (responce.ok) {
+        removeTodo(todoId);
     }
 }
