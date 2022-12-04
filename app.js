@@ -58,6 +58,10 @@ function removeTodo(todoId) {
     todo.remove();
 }
 
+function alertError(error) {
+    alert(error.message);
+}
+
 // Event logic (Функция получение данных и записи)
 function initApp() {
     Promise.all([getAllTodos(), getAllUsers()]).then(values => {
@@ -94,63 +98,87 @@ function handleClose() {
 // Async logic
 // Получение всех задач
 async function getAllTodos() {
-    const responce = await fetch('https://jsonplaceholder.typicode.com/todos');
-    const data = await responce.json();
+    try {
+        const responce = await fetch('https://jsonplaceholder.typicode.com/todos');
+        const data = await responce.json();
+        return data;
 
-    return data;
+    } catch (error) {
+        alertError(error);
+    }
 }
 
 // Получение всех пользователей
 async function getAllUsers() {
-    const responce = await fetch('https://jsonplaceholder.typicode.com/users');
-    const data = await responce.json();
+    try {
+        const responce = await fetch('https://jsonplaceholder.typicode.com/users');
+        const data = await responce.json();
+        return data;
 
-    return data;
+    } catch (error) {
+        alertError(error);
+    }
 }
 
 // Функция создания новой задачи
 async function createTodo(todo) {
-    const responce = await fetch('https://jsonplaceholder.typicode.com/todos', {
-        method: 'POST',
-        body: JSON.stringify(todo),
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
+    try {
+        const responce = await fetch('https://jsonplaceholder.typicode.com/todos', {
+            method: 'POST',
+            body: JSON.stringify(todo),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        const newTodo = await responce.json();
+        printTodo(newTodo);
 
-    const newTodo = await responce.json();
-    printTodo(newTodo);
+    } catch (error) {
+        alertError(error);
+    }
+
 }
 
 // Функция изменения чекбокса
 async function toggleTodoComplete(todoId, completed) {
-    const responce = await fetch(`https://jsonplaceholder.typicode.com/todos/${todoId}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ completed: completed }),
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
+    try {
+        const responce = await fetch(`https://jsonplaceholder.typicode.com/todos/${todoId}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ completed: completed }),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
 
-    // Проверка изменения статуса
-    const data = await responce.json();
-    console.log(data);
+        // Проверка изменения статуса
+        const data = await responce.json();
+        console.log(data);
 
-    if (!responce.ok) {
-        // error
+        if (!responce.ok) {
+            throw new Error('Failed to connect to server');
+        }
+
+    } catch (error) {
+        alertError(error);
     }
 }
 
 async function deleteTodo(todoId) {
-    const responce = await fetch(`https://jsonplaceholder.typicode.com/todos/${todoId}`, {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
+    try {
+        const responce = await fetch(`https://jsonplaceholder.typicode.com/todos/${todoId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
 
-    // Если ответ с сервера пришел корректный, то удаляем из фронта 
-    if (responce.ok) {
-        removeTodo(todoId);
+        // Если ответ с сервера пришел корректный, то удаляем из фронта 
+        if (responce.ok) {
+            removeTodo(todoId);
+        } else {
+            throw new Error('Failed to connect to server');
+        }
+    } catch (error) {
+        alertError(error);
     }
 }
